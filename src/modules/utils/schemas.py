@@ -46,26 +46,35 @@ class GeneralSupervisor(BaseModel):
 # Training routines
 
 class AerobicExercice(BaseModel):
+    """ Dados de exercício aeróbico """
+    type: Literal["aerobic"]
     modality: str
-    duration: int
+    duration: str
     description: str
     justification: str
 
 class WeighedExercice(BaseModel):
+    """ Dados de exercício de força e resistência """
+    type: Literal["weighed"]
     exercise: str
     series: int
-    repetitions: int
-    load: int
+    repetitions: str
+    load: str
     rest: int
     justification: str
-    
+
 class StretchingExercice(BaseModel):
+    """ Dados de exercício de alongamento """
+    type: Literal["stretching"]
     exercise: str
-    duration: int
+    duration: str
     description: str
     justification: str
 
+    
 class RestDay(BaseModel):
+    """ Dia de descanso """
+    type: Literal["rest"]
     description: str
     suggestions: Optional[List[str]]
     justification: str
@@ -74,30 +83,15 @@ class RestDay(BaseModel):
 class TrainingDay(BaseModel):
     day: str = Literal["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"]
     period: str = Literal["manhã", "tarde", "noite"]
-    training_routine : Union[AerobicExercice, WeighedExercice, StretchingExercice, RestDay]
+    training_routine : Union[AerobicExercice, WeighedExercice, RestDay]
 
 class PhysicalTest(BaseModel):
     test_name: str
-    test_exercises: List[Union[AerobicExercice, WeighedExercice, StretchingExercice]]
+    test_exercises: List[Union[AerobicExercice, WeighedExercice]]
     interval_between_tests: int
     justification: str
 
-class CharacteristicsToImprove(BaseModel):
-    characteristic: str
-    description: str
-    justification: str
 
-
-class Microcycle(BaseModel):
-    duration_in_days: int
-    specific_objective: str
-    training_days: List[TrainingDay]
-
-
-class Macrocycle(BaseModel):
-    macrocycle_name: str
-    characteristics_to_improve: List[CharacteristicsToImprove]
-    microcycles: List[Union[Microcycle, None]]
 
 # Diet routines
 
@@ -141,7 +135,7 @@ class AgentState(TypedDict):
     sport_expert_informations: ExpertInformations
 
     # training routine
-    macrocycle: Macrocycle
+    training_objective: str
     physical_test: PhysicalTest
     training_feedback: List[str]
     training_approved: bool

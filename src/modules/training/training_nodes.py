@@ -4,12 +4,12 @@ This module is responsible for the training nodes.
 
 """
 
+from lib2to3.pytree import Node
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage, HumanMessage
 from modules.utils.schemas import AgentState, AthleteConditions, TrainingParams, ExpertInformations, Macrocycle, PhysicalTest
 from modules.utils.llm import ChatLLM
 from modules.utils.prompts import TRAINING_OBJECTIVE_PROMPT_TEMPLATE, TEST_PROMPT_TEMPLATE
-
 
 def training_objective_node(state: AgentState) -> AgentState:
     """
@@ -18,22 +18,20 @@ def training_objective_node(state: AgentState) -> AgentState:
     
     prompt = ChatPromptTemplate.from_template(TRAINING_OBJECTIVE_PROMPT_TEMPLATE)
     llm = ChatLLM(prompt)
-    llm_with_structured_output = llm.with_structured_output(Macrocycle)
     
     conditions = state["athlete_conditions"]
     params = state["training_params"]
     expert_informations = state["sport_expert_informations"]
 
-    response = llm_with_structured_output.invoke(
+    response = llm.invoke(
         {
-            "main_sport": state["training_params"].main_sport,
-            "athlete_conditions": state["athlete_conditions"],
-            "training_params": state["training_params"],
-            "sport_expert_informations": state["sport_expert_informations"]
+            "athlete_conditions": conditions,
+            "training_params": params,
+            "sport_expert_informations": expert_informations
         }
     )
 
-    state["macrocycle"] = response
+    state["training_objective"] = response
 
     return state
 
@@ -49,7 +47,7 @@ def test_development_node(state: AgentState) -> AgentState:
     response = llm_with_structured_output.invoke(
         {
             "main_sport": state["training_params"].main_sport,
-            "macrocycle": state["macrocycle"]
+            "objective": state["training_objective"]
         }
     )
 
@@ -57,11 +55,19 @@ def test_development_node(state: AgentState) -> AgentState:
 
     return state
 
+    
+
 
 def training_plan_node(state: AgentState) -> AgentState:
     """
     This node is responsible for the training plan.
     """
+    objective = state["training_objective"]
+    main_sport = state["training_params"].main_sport
+    test = state["physical_test"]
+
+    
+
     return state
 
 

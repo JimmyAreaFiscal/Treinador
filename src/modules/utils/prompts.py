@@ -1,14 +1,16 @@
 SPORT_EXPERT_PROMPT_TEMPLATE = """ 
 Você é um especialista no esporte {main_sport} e pesquisador que fornece informações detalhadas sobre o esporte para atletas. 
 
-Seu objetivo é fornecer infomações detalhadas de como o atleta pode melhorar seu desempenho no esporte {main_sport}, incluindo informações de:
+Seu objetivo é fornecer infomações detalhadas de como o atleta pode melhorar seu desempenho no esporte {main_sport} na área de: 
 
-1. Quais são as principais características do esporte {main_sport} a serem consideradas para o treino do atleta
-2. Quais são os principais testes físicos para mensurar melhorias no esporte {main_sport}
-3. Quais são os principais fatores de treinamento físico e de estrutura corporal que influenciam o desempenho no esporte {main_sport}
-4. Quais são as principais estratégias de treino para melhorar o desempenho no esporte {main_sport}
-5. Quais são as principais estratégias de dieta para melhorar o desempenho no esporte {main_sport}
-6. Quais são os principais suplementos para melhorar o desempenho no esporte {main_sport}
+1. Treinamento físico e desempenho
+2. Treinamento cognitivo e mental
+3. Nutrição, composição corporal adequada e suplementação
+4. Prevenção de lesões
+5. Estratégias de treino
+6. Estratégias de dieta
+7. Estratégias de suplementação
+8. Estratégias de prevenção de lesões
 
 Formato da resposta:
 
@@ -23,138 +25,67 @@ Formato da resposta:
 
 """
 
-TRAINING_OBJECTIVE_PROMPT_TEMPLATE = """ 
-Você é um especialista em treinamento e fisiologia, focado no esporte {main_sport}.
-
-Sua tarefa é fornecer um objetivo de treino para o atleta baseado em suas condições físicas atuais, suas variáveis de treino e as informações do expert no esporte.
-
-O seu objetivo deve incluir quais características físicas o atleta deve melhorar.
-
-
-**Informações do atleta**:
-
-Condições físicas atuais: {athlete_conditions}
-Variáveis de treino: {training_params}
-Informações do expert no esporte: {sport_expert_informations}
-
-"""
 
 TEST_PROMPT_TEMPLATE = """ 
 Você é um especialista em treinamento e fisiologia, focado no esporte {main_sport}.
 
-Sua tarefa é fornecer um teste físico padronizado para o macrociclo de treino, a fim de mensurar o avanço do atleta frente ao objetivo do macrociclo de treino, considerando as especificidades do macrociclo de treino e do esporte.
+Sua tarefa é fornecer um teste físico padronizado **com PELO MENOS 8 a 15 exercícios** para o macrociclo de treino, a fim de mensurar o avanço do atleta frente ao objetivo do treinamento, considerando o objetivo fornecido e as características do esporte.
 
 Seu objetivo é permitir que o atleta seja capaz de avaliar seu progresso e ajustar seu treino conforme necessário.
 
+Restrições:
+
+1. Deve haver pelo menos 1 teste físico para cada grupamento muscular, conforme o objetivo do treinamento.
+2. Deve haver entre 8 a 15 testes físicos no total
+3. Somente pode have teste físico para as modalidades de treino aceitas.
+4. Justifique a escolha o exercício como teste físico, e como o exercício poderá mensurar a evolução do atleta frente ao objetivo do macrociclo de treino.
+
 O formato da resposta deve ser o seguinte:
 
-{
+{{
     "test_name": "nome do teste físico",
     "test_exercises": "lista de exercícios do teste físico a serem realizados. Usar o padrão de exercícios passado abaixo"
     "interval_between_tests": "intervalo entre os testes físicos"
     "justification": "justificativas para o teste físico, explicando como a escolha do intervalo de tempo entre os testes foi feita."
-}
+}}
 
 
 Para cada uma das seguintes modalidades de exercícios, seguir o formato para "test_exercises":
 
 ## Aeróbico:
-{
-    "exercise": "nome do exercício",
-    "duration": "duração do exercício",
+{{
+    "type": "aerobic",
+    "modality": "nome da modalidade do exercício aeróbico (corrida longa, ciclismo longo, tiros de corrida, ciclismo em elevação,etc)",
+    "duration": "duração do exercício. Caso seja um teste para avaliar o tempo a completar uma distância, indicar com 'distância' + 'unidade de medida' (ex: 10km, 20km, etc). Do contrário, indicar a duração em minutos",
     "description": "descrição do exercício",
     "justification": "justificativa para a escolha do exercício, explicando o porquê desse exercício mensurar o avanço do atleta frente ao objetivo do macrociclo de treino"
-}
+}}
 
 ## Força e resistência:
-{
+{{
+    "type": "weighed",
     "exercise": "nome do exercício",
     "series": "quantidade de séries, deve ser igual a 1",
-    "repetitions": "quantidade de repetições",
-    "load": "carga do exercício esperada para o atleta",
+    "repetitions": "quantidade de repetições a ser realizadas. Caso seja máximo de repetições com determinada carga, indicar com 'max'. Do contrário, indicar a quantidade de repetições",
+    "load": "carga do exercício esperada para o atleta. Caso seja \% do RM, indicar com %. Do contrário, indicar a carga em kg",
     "rest": "tempo de descanso entre os exercícios antes de realizar próximo exercício do teste",
     "justification": "justificativa para a escolha do exercício e repetições, explicando o porquê desse exercício mensurar o avanço do atleta frente ao objetivo do macrociclo de treino"
-}
+}}
 
 ## Alongamento:
-{
+{{
+    "type": "stretching",
     "exercise": "nome do exercício",
-    "duration": "duração do exercício",
+    "duration": "duração do exercício. Caso seja um teste para avaliar o alcance de um determinado objetivo, indicar com 'objetivo' + 'unidade de medida' (ex: 10cm, 20cm, etc). Do contrário, indicar a duração em segundos",
     "description": "descrição etalhada de como executar do exercício",
     "justification": "justificativa para a escolha do exercício, explicando o porquê desse exercício mensurar o avanço do atleta frente ao objetivo do macrociclo de treino"
-}
+}}
 
-
-Exemplo de resposta em caso de teste físico com 1 teste aeróbico, 2 testes de força e resistência e 1 teste de alongamento:
-
-Macrociclo: {
-    "macrocycle_name": "macrociclo 1",
-    "characteristics_to_improve": [
-        {
-            "characteristic": "resistência muscular ",
-            "description": "aumentar a resistência muscular do atleta",
-            "justification": "permitir que o atleta seja capaz de manter o ritmo de corrida por mais tempo mantendo a técnica de corrida de motocross"
-        },
-        {
-            "characteristic": "capacidade aeróbica",
-            "description": "aumentar a capacidade aeróbica do atleta",
-            "justification": "permitir que o atleta seja capaz de manter o ritmo de corrida por mais tempo sem perda de capacidade neuromuscular"
-        },
-        {
-            "characteristic": "equilíbrio",
-            "description": "aumentar a capacidade de o equilíbrio do atleta",
-            "justification": "permitir que o atleta seja capaz de manter o equilíbrio em situações adversas"
-        }
-    ],
-    "microcycles": []
-}
-
-Detalhes do esporte: 
-
-{
-    "main_sport": "motocross",
-    "main_sport_details": ["motocross é um esporte que envolve corrida em uma motocicleta, com o objetivo de percorrer a maior distância possível em um período de tempo determinado.", "Um dos desafios dos atletas motocross é manter o equilíbrio em situações adversas, como rampas, curvas e descidas."]
-}
-
-
-Output:
-
-{
-    "test_name": "teste físico",
-    "test_exercises": [
-        {
-            "exercise": "corrida de 6.000m",
-            "duration": "60 minutos",
-            "description": "corrida de 6.000m em ritmo forte",
-            "justification": "a corrida de 6.000m é um exercício que mensura a capacidade aeróbica do atleta"
-        },
-        {
-            "exercise": "agachamento com barra",
-            "series": 1,
-            "repetitions": 3,
-            "load": 100,
-            "rest": 10,
-            "justification": "o agachamento com barra é um exercício que mensura a capacidade de força e resistência do atleta"
-        },
-        {
-            "exercise": "flexões de braço no chão",
-            "series": 1,
-            "repetitions": 50,
-            "load": 0,
-            "rest": 10,
-            "justification": "Teste do máximo de flexões de braço permite avaliar resistência dos membros superiores do atleta para segurar o próprio corpo em cima da moto"
-        },
-        {
-            "exercise": "alongamento",
-            "duration": "10 minutos",
-            "description": "alongamento de 10 minutos",
-            "justification": "o alongamento é um exercício que mensura a capacidade de alongamento do atleta"
-        }
 
 ##################
 
-Macrociclo: {macrocycle}
-
+Objetivo do treinamento: {objective}
+Modalidades de treino aceitas: {accepted_training_modalities}
 Detalhes do esporte: {main_sport_details}
 
 """
